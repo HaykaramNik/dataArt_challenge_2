@@ -1,6 +1,6 @@
-# Your Project Name
+# CRUD API
 
-A brief description of the project.
+TypeScript with Express to create, read, update, and delete data.
 
 ## Installation
 
