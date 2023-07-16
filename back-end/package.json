@@ -4,7 +4,12 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "dev": "ts-node-dev --respawn --pretty --transpile-only src/index.ts"
+    "db-up": "docker-compose up",
+    "dev": "ts-node-dev --respawn --pretty --transpile-only src/index.ts",
+    "db-init": "npx sequelize-cli db:migrate && npx sequelize-cli db:seed:all",
+    "db-undo": "npx sequelize-cli db:seed:undo:all && npx sequelize-cli db:migrate:undo:all",
+    "db-down": "docker-compose down",
+    "db-down-force": "docker-compose down -v"
   },
   "dependencies": {
     "cors": "^2.8.5",
