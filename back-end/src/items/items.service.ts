@@ -2,77 +2,70 @@
  * Data Model Interfaces
  */
 
-import { BaseItem, Item } from "./item.interface";
-import { Items } from "./items.interface";
-
-/**
- * In-Memory Store
- */
-
-let items: Items = {
-  1: {
-    id: 1,
-    name: "Burger",
-    price: 599,
-    description: "Tasty",
-    image: "https://cdn.auth0.com/blog/whatabyte/burger-sm.png"
-  },
-  2: {
-    id: 2,
-    name: "Pizza",
-    price: 299,
-    description: "Cheesy",
-    image: "https://cdn.auth0.com/blog/whatabyte/pizza-sm.png"
-  },
-  3: {
-    id: 3,
-    name: "Tea",
-    price: 199,
-    description: "Informative",
-    image: "https://cdn.auth0.com/blog/whatabyte/tea-sm.png"
-  }
-};
+import { BaseItemDTO, ItemDTO } from './item.dto';
+import Item from './item.entity';
 
 /**
  * Service Methods
  */
 
-export const findAll = async (): Promise<Item[]> => Object.values(items);
+export const findAll = async (): Promise<Item[]> => {
+  
+  const items: Item[] = await Item.findAll();
+  return items;
+};
 
-export const find = async (id: number): Promise<Item> => items[id];
+export const find = async (id: number): Promise<Item | null> =>
+  await Item.findByPk(id);
 
-export const create = async (newItem: BaseItem): Promise<Item> => {
-  const id = new Date().valueOf();
+export const create = async (newItem: BaseItemDTO): Promise<Item> => {
+  const item = await Item.create({
+    description: newItem.description,
+    image: newItem.image,
+    name: newItem.name,
+    price: newItem.price,
+    createdAt: new Date(),
+    updatedAt: new Date()
+  });
 
-  items[id] = {
-    id,
-    ...newItem,
-  };
-
-  return items[id];
+  return item;
 };
 
 export const update = async (
   id: number,
-  itemUpdate: BaseItem
+  itemUpdate: BaseItemDTO
 ): Promise<Item | null> => {
-  const item = await find(id);
+  const item = await Item.findByPk(id);
 
   if (!item) {
     return null;
   }
 
-  items[id] = { id, ...itemUpdate };
+  await Item.update(
+    {
+      ...itemUpdate,
+      updatedAt: new Date()
+    },
+    {
+      where: {
+        id: id,
+      },
+    }
+  );
 
-  return items[id];
+  return await Item.findByPk(id);
 };
 
 export const remove = async (id: number): Promise<null | void> => {
-  const item = await find(id);
+  let item = await Item.findByPk(id);
 
   if (!item) {
     return null;
   }
 
-  delete items[id];
+  await Item.destroy({
+    where: {
+      id: id,
+    },
+  });
 };

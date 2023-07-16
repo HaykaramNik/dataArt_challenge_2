@@ -4,7 +4,8 @@
 
 import express, { Request, Response } from 'express';
 import * as ItemService from './items.service';
-import { BaseItem, Item } from './item.interface';
+import { BaseItemDTO, ItemDTO } from './item.dto';
+import Item from './item.entity';
 
 /**
  * Router Definition
@@ -20,11 +21,16 @@ export const itemsRouter = express.Router();
 
 itemsRouter.get('/', async (req: Request, res: Response) => {
   try {
+    
     const items: Item[] = await ItemService.findAll();
 
     res.status(200).send(items);
-  } catch (e: any) {
-    res.status(500).send(e.message);
+  } catch (e: unknown) {
+    if (e instanceof Error) {
+      res.status(500).send(e.message);
+    } else {
+      res.status(500).send(String(e));
+    }
   }
 });
 
@@ -34,15 +40,19 @@ itemsRouter.get('/:id', async (req: Request, res: Response) => {
   const id: number = parseInt(req.params.id, 10);
 
   try {
-    const item: Item = await ItemService.find(id);
+    const item: Item | null = await ItemService.find(id);
 
     if (item) {
       return res.status(200).send(item);
     }
 
     res.status(404).send('item not found');
-  } catch (e: any) {
-    res.status(500).send(e.message);
+  } catch (e: unknown) {
+    if (e instanceof Error) {
+      res.status(500).send(e.message);
+    } else {
+      res.status(500).send(String(e));
+    }
   }
 });
 
@@ -50,13 +60,17 @@ itemsRouter.get('/:id', async (req: Request, res: Response) => {
 
 itemsRouter.post('/', async (req: Request, res: Response) => {
   try {
-    const item: BaseItem = req.body;
+    const item: BaseItemDTO = req.body;
 
     const newItem = await ItemService.create(item);
 
     res.status(201).json(newItem);
-  } catch (e: any) {
-    res.status(500).send(e.message);
+  } catch (e: unknown) {
+    if (e instanceof Error) {
+      res.status(500).send(e.message);
+    } else {
+      res.status(500).send(String(e));
+    }
   }
 });
 
@@ -66,9 +80,9 @@ itemsRouter.put('/:id', async (req: Request, res: Response) => {
   const id: number = parseInt(req.params.id, 10);
 
   try {
-    const itemUpdate: Item = req.body;
+    const itemUpdate: ItemDTO = req.body;
 
-    const existingItem: Item = await ItemService.find(id);
+    const existingItem: Item | null = await ItemService.find(id);
 
     if (existingItem) {
       const updatedItem = await ItemService.update(id, itemUpdate);
@@ -78,8 +92,12 @@ itemsRouter.put('/:id', async (req: Request, res: Response) => {
     const newItem = await ItemService.create(itemUpdate);
 
     res.status(201).json(newItem);
-  } catch (e: any) {
-    res.status(500).send(e.message);
+  } catch (e: unknown) {
+    if (e instanceof Error) {
+      res.status(500).send(e.message);
+    } else {
+      res.status(500).send(String(e));
+    }
   }
 });
 
@@ -91,7 +109,11 @@ itemsRouter.delete('/:id', async (req: Request, res: Response) => {
     await ItemService.remove(id);
 
     res.sendStatus(204);
-  } catch (e: any) {
-    res.status(500).send(e.message);
+  } catch (e: unknown) {
+    if (e instanceof Error) {
+      res.status(500).send(e.message);
+    } else {
+      res.status(500).send(String(e));
+    }
   }
 });
